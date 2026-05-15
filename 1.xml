@@ -76,7 +76,7 @@
     <div id="unity-container" class="unity-desktop">
         <canvas id="unity-canvas"></canvas>
         <div id="unity-loading-bar">
-            <div id="unity-logo"><img src="https://cdn.jsdelivr.net/gh/rammyus/4563@main/logo.png" alt="Game Logo" /></div>
+            <div id="unity-logo"><img src="https://cdn.jsdelivr.net/gh/zx9qv8n4rpl7t6k2m1y/neggex@main/logoNEW.png" alt="Game Logo" /></div>
             <div id="unity-progress-bar-empty">
                 <div id="unity-progress-bar-full"></div>
             </div>
