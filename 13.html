@@ -1,0 +1,191 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moonlight | Initialization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&amp;family=Space+Mono&amp;display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050505;
+            --text-bright: #ffffff;
+            --text-medium: #bbbbbb;
+            --text-dim: #777777;
+            --border: rgba(255, 255, 255, 0.2);
+            --font-tactical: 'Syncopate', sans-serif;
+            --font-mono: 'Space Mono', monospace;
+        }
+
+        body, html {
+            background: var(--bg);
+            margin: 0; padding: 0;
+            height: 100%; width: 100%;
+            overflow: hidden;
+            font-family: var(--font-tactical);
+            color: var(--text-bright);
+        }
+
+        #starfield { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.6; }
+
+        #stage {
+            position: relative; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1;
+        }
+
+        /* Loader */
+        #loader-wrapper {
+            position: absolute;
+            transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.8s ease;
+            text-align: center;
+        }
+
+        .loader-logo { width: 140px; filter: drop-shadow(0 0 15px rgba(255,255,255,0.3)); }
+        
+        .progress-container {
+            width: 300px; height: 3px; background: rgba(255,255,255,0.1);
+            margin: 25px auto; overflow: hidden;
+        }
+        #progress-fill { width: 0%; height: 100%; background: #fff; transition: width 0.3s ease; }
+        #boot-status { font-size: 10px; letter-spacing: 5px; color: var(--text-medium); text-transform: uppercase; }
+
+        /* Gateway */
+        #gateway-wrapper {
+            position: absolute;
+            transform: translateX(120px); 
+            opacity: 0;
+            transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.8s ease;
+            pointer-events: none;
+        }
+
+        .terminal-box {
+            width: 500px; padding: 60px;
+            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.92);
+            position: relative;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+        }
+
+        .terminal-box::before {
+            content: "ID: MNLGHT-Q000";
+            position: absolute; top: -12px; left: 30px;
+            font-size: 10px; color: var(--text-dim); background: var(--bg); padding: 0 12px;
+            font-family: var(--font-mono);
+        }
+
+        .title { font-size: 28px; letter-spacing: 15px; margin-bottom: 10px; text-align: center; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        .subtitle { font-size: 10px; letter-spacing: 6px; color: var(--text-dim); text-align: center; margin-bottom: 50px; }
+
+        .btn-container { 
+            border: 1px solid var(--border); padding: 20px; margin-bottom: 30px; 
+            cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.03);
+        }
+        .btn-container:hover { border-color: #fff; background: rgba(255,255,255,0.08); }
+        .btn-text { font-size: 12px; letter-spacing: 5px; text-align: center; color: var(--text-bright); font-weight: 700; }
+
+        .log-area { font-family: var(--font-mono); font-size: 11px; color: var(--text-medium); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+
+        /* Animation States */
+        .slide-out { transform: translateX(-120px) !important; opacity: 0 !important; pointer-events: none; }
+        .slide-in { transform: translateX(0) !important; opacity: 1 !important; pointer-events: auto !important; }
+    </style>
+</head>
+<body onload="initAll()">
+
+    <canvas id="starfield" width="974" height="698"></canvas>
+
+    <div id="stage">
+        <div id="loader-wrapper">
+            <img src="https://files.catbox.moe/ms1zil.png" alt="Moonlight Logo" class="loader-logo">
+            <div class="progress-container"><div id="progress-fill" style="width: 100%;"></div></div>
+            <p id="boot-status">SYSTEMS OPTIMAL.</p>
+        </div>
+
+        <div id="gateway-wrapper">
+            <div class="terminal-box">
+                <div class="title">MOONLIGHT</div>
+                <div class="subtitle">ENCRYPTED_GATEWAY</div>
+                <div class="btn-container" onclick="launchAndReplace()">
+                    <div class="btn-text">INITIALIZE_SESSION</div>
+                </div>
+                <div class="log-area" id="terminal-logs">
+                    &gt; INITIALIZING KERNEL... <span style="float:right">DONE</span><br>
+                    &gt; CONNECTING TO RELAY... <span style="float:right">SECURE</span><br>
+                    &gt; DECRYPTING ASSETS... <span style="float:right">100%</span><br>
+                    &gt; STARFIELD CALIBRATION... <span style="float:right">OPTIMAL</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Starfield Logic
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        function initStars() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            stars = [];
+            for (let i = 0; i < 150; i++) {
+                stars.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 1.5, speed: Math.random() * 0.05 });
+            }
+        }
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#fff';
+            stars.forEach(star => { ctx.beginPath(); ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2); ctx.fill(); star.y -= star.speed; if (star.y < 0) star.y = canvas.height; });
+            requestAnimationFrame(drawStars);
+        }
+
+        // Boot Transition
+        let currentStep = 0;
+        const bootSequences = [
+            { text: "INITIALIZING KERNEL...", delay: 400, progress: 25 },
+            { text: "CONNECTING TO RELAY...", delay: 600, progress: 50 },
+            { text: "DECRYPTING ASSETS...", delay: 500, progress: 75 },
+            { text: "SYSTEMS OPTIMAL.", delay: 300, progress: 100 }
+        ];
+
+        function runBoot() {
+            const statusText = document.getElementById('boot-status');
+            const progressFill = document.getElementById('progress-fill');
+            if (currentStep < bootSequences.length) {
+                const step = bootSequences[currentStep];
+                statusText.innerText = step.text;
+                progressFill.style.width = `${step.progress}%`;
+                setTimeout(() => { currentStep++; runBoot(); }, step.delay);
+            } else {
+                setTimeout(() => {
+                    document.getElementById('loader-wrapper').classList.add('slide-out');
+                    document.getElementById('gateway-wrapper').classList.add('slide-in');
+                }, 600);
+            }
+        }
+
+        // THE SECURE LAUNCH
+        function launchAndReplace() {
+            const mainUrl = window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/main.html";
+            const decoyUrl = "https://www.google.com";
+
+            const win = window.open('about:blank', '_blank');
+            if (win) {
+                // 1. Cloak the new tab
+                win.document.title = "Google Docs";
+                win.document.body.style.margin = "0";
+                win.document.body.style.overflow = "hidden";
+                const iframe = win.document.createElement('iframe');
+                iframe.style.width = "100%"; iframe.style.height = "100vh"; iframe.style.border = "none";
+                iframe.src = mainUrl;
+                win.document.body.appendChild(iframe);
+
+                // 2. Kill the evidence in this tab
+                window.location.replace(decoyUrl);
+            } else {
+                alert("POPUP_BLOCKED: Please allow popups to initialize.");
+            }
+        }
+
+        function initAll() { initStars(); drawStars(); runBoot(); }
+        window.addEventListener('resize', initStars);
+    </script>
+
+
+</body></html>
